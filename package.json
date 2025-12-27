@@ -1,0 +1,27 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "نظام تخطيط موارد مؤسسات (ERP) خفيف الوزن وخالٍ من أطر العمل (Framework-free) لإدارة منصات ومنشورات وسائل التواصل الاجتماعي. تم بناؤه باستخدام HTML و CSS و JavaScript بشكل نقي (Vanilla).",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aipro5469-jpg/miniErp.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/aipro5469-jpg/miniErp/issues"
+  },
+  "homepage": "https://github.com/aipro5469-jpg/miniErp#readme",
+  "dependencies": {
+    "body-parser": "^2.2.1",
+    "cors": "^2.8.5",
+    "express": "^5.2.1"
+  }
+}
