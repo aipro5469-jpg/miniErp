@@ -120,6 +120,7 @@ const App = {
                         <thead>
                             <tr>
                                 <th>Content</th>
+                                <th>Image</th>
                                 <th>Platform</th>
                                 <th>Date</th>
                                 <th>Status</th>
@@ -216,9 +217,14 @@ const App = {
                                 else if (post.status === 'Draft') statusClass = 'status-draft';
                                 else if (post.status === 'Scheduled') statusClass = 'status-scheduled';
 
+                                const imageHtml = post.image
+                                    ? `<img src="${post.image}" class="post-thumbnail" style="max-width: 50px; max-height: 50px; object-fit: cover; border-radius: 4px;">`
+                                    : '<span style="color: #9ca3af; font-size: 0.8rem;">No Image</span>';
+
                                 return `
                                     <tr>
                                         <td>${post.content}</td>
+                                        <td>${imageHtml}</td>
                                         <td>${platformIcon} ${platformName}</td>
                                         <td>${post.date}</td>
                                         <td><span class="status-badge ${statusClass}">${post.status}</span></td>
@@ -329,6 +335,7 @@ async function openPostModal(id = null) {
     // Reset form
     form.reset();
     document.getElementById('post-id').value = '';
+    document.getElementById('post-image').value = ''; // Clear file input
     // Set default date to today
     document.getElementById('post-date').valueAsDate = new Date();
 
@@ -362,6 +369,8 @@ document.getElementById('post-form').addEventListener('submit', async (e) => {
     const platformId = document.getElementById('post-platform').value;
     const date = document.getElementById('post-date').value;
     const status = document.getElementById('post-status').value;
+    const imageInput = document.getElementById('post-image');
+    const imageFile = imageInput.files.length > 0 ? imageInput.files[0] : null;
 
     const post = {
         id: id ? parseInt(id) : null,
@@ -371,7 +380,7 @@ document.getElementById('post-form').addEventListener('submit', async (e) => {
         status
     };
 
-    await store.savePost(post);
+    await store.savePost(post, imageFile);
     closePostModal();
 
     if (App.currentPage === 'posts') {
