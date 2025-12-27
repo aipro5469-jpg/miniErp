@@ -59,6 +59,22 @@
       "date": "2023-11-01",
       "status": "Draft",
       "id": 1766857724112
+    },
+    {
+      "content": "Image Test",
+      "platformId": 1,
+      "date": "2023-11-01",
+      "status": "Draft",
+      "image": "/uploads/1766858552325.png",
+      "id": 1766858552334
+    },
+    {
+      "content": "Image Test Fix",
+      "platformId": 1,
+      "date": "2023-11-01",
+      "status": "Draft",
+      "image": "/uploads/1766858737818.png",
+      "id": 1766858737825
     }
   ]
 }
