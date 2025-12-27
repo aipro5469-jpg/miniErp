@@ -5,18 +5,18 @@ const App = {
     pageTitle: null,
     navLinks: null,
 
-    init() {
+    async init() {
         this.contentArea = document.getElementById('content-area');
         this.pageTitle = document.getElementById('page-title');
         this.navLinks = document.querySelectorAll('.nav-link');
 
         this.setupNavigation();
-        this.loadContent('dashboard');
+        await this.loadContent('dashboard');
     },
 
     setupNavigation() {
         this.navLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
+            link.addEventListener('click', async (e) => {
                 e.preventDefault();
                 const target = link.dataset.target;
 
@@ -25,12 +25,12 @@ const App = {
                 link.classList.add('active');
 
                 // Load Content
-                this.loadContent(target);
+                await this.loadContent(target);
             });
         });
     },
 
-    loadContent(target) {
+    async loadContent(target) {
         this.currentPage = target;
         // Update Active State in case loadContent is called directly
         this.navLinks.forEach(l => {
@@ -47,27 +47,27 @@ const App = {
         switch(target) {
             case 'dashboard':
                 this.pageTitle.textContent = 'Dashboard';
-                this.renderDashboard();
+                await this.renderDashboard();
                 break;
             case 'platforms':
                 this.pageTitle.textContent = 'Platforms Management';
-                this.renderPlatforms();
+                await this.renderPlatforms();
                 break;
             case 'posts':
                 this.pageTitle.textContent = 'Posts Management';
-                this.renderPosts();
+                await this.renderPosts();
                 break;
         }
     },
 
-    refresh() {
-        this.loadContent(this.currentPage);
+    async refresh() {
+        await this.loadContent(this.currentPage);
     },
 
     // --- Dashboard Logic ---
-    renderDashboard() {
-        const platforms = store.getPlatforms();
-        const posts = store.getPosts();
+    async renderDashboard() {
+        const platforms = await store.getPlatforms();
+        const posts = await store.getPosts();
 
         const publishedCount = posts.filter(p => p.status === 'Published').length;
         const scheduledCount = posts.filter(p => p.status === 'Scheduled').length;
@@ -155,8 +155,8 @@ const App = {
     },
 
     // --- Platforms Logic ---
-    renderPlatforms() {
-        const platforms = store.getPlatforms();
+    async renderPlatforms() {
+        const platforms = await store.getPlatforms();
 
         const html = `
             <div style="display: flex; justify-content: flex-end; margin-bottom: 24px;">
@@ -183,9 +183,9 @@ const App = {
     },
 
     // --- Posts Logic ---
-    renderPosts() {
-        const posts = store.getPosts();
-        const platforms = store.getPlatforms();
+    async renderPosts() {
+        const posts = await store.getPosts();
+        const platforms = await store.getPlatforms();
 
         const html = `
              <div style="display: flex; justify-content: flex-end; margin-bottom: 24px;">
@@ -248,7 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Global functions for inline event handlers (Platform)
-function openPlatformModal(id = null) {
+async function openPlatformModal(id = null) {
     const modal = document.getElementById('platform-modal');
     const form = document.getElementById('platform-form');
     const title = document.getElementById('platform-modal-title');
@@ -258,7 +258,7 @@ function openPlatformModal(id = null) {
     document.getElementById('platform-id').value = '';
 
     if (id) {
-        const platforms = store.getPlatforms();
+        const platforms = await store.getPlatforms();
         const platform = platforms.find(p => p.id === id);
         if (platform) {
             document.getElementById('platform-id').value = platform.id;
@@ -279,7 +279,7 @@ function closePlatformModal() {
 }
 
 // Handle Form Submit
-document.getElementById('platform-form').addEventListener('submit', (e) => {
+document.getElementById('platform-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const id = document.getElementById('platform-id').value;
     const name = document.getElementById('platform-name').value;
@@ -293,12 +293,12 @@ document.getElementById('platform-form').addEventListener('submit', (e) => {
         color
     };
 
-    store.savePlatform(platform);
+    await store.savePlatform(platform);
     closePlatformModal();
 
     // Refresh current view if it is platforms
     if (App.currentPage === 'platforms') {
-        App.refresh();
+        await App.refresh();
     }
 });
 
@@ -306,24 +306,24 @@ function editPlatform(id) {
     openPlatformModal(id);
 }
 
-function deletePlatform(id) {
+async function deletePlatform(id) {
     if(confirm('Are you sure you want to delete this platform?')) {
-        store.deletePlatform(id);
+        await store.deletePlatform(id);
         if (App.currentPage === 'platforms') {
-            App.refresh();
+            await App.refresh();
         }
     }
 }
 
 // Global functions for inline event handlers (Post)
-function openPostModal(id = null) {
+async function openPostModal(id = null) {
     const modal = document.getElementById('post-modal');
     const form = document.getElementById('post-form');
     const title = document.getElementById('post-modal-title');
     const platformSelect = document.getElementById('post-platform');
 
     // Populate platforms
-    const platforms = store.getPlatforms();
+    const platforms = await store.getPlatforms();
     platformSelect.innerHTML = platforms.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
 
     // Reset form
@@ -333,7 +333,7 @@ function openPostModal(id = null) {
     document.getElementById('post-date').valueAsDate = new Date();
 
     if (id) {
-        const posts = store.getPosts();
+        const posts = await store.getPosts();
         const post = posts.find(p => p.id === id);
         if (post) {
             document.getElementById('post-id').value = post.id;
@@ -355,7 +355,7 @@ function closePostModal() {
 }
 
 // Handle Form Submit
-document.getElementById('post-form').addEventListener('submit', (e) => {
+document.getElementById('post-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const id = document.getElementById('post-id').value;
     const content = document.getElementById('post-content').value;
@@ -371,11 +371,11 @@ document.getElementById('post-form').addEventListener('submit', (e) => {
         status
     };
 
-    store.savePost(post);
+    await store.savePost(post);
     closePostModal();
 
     if (App.currentPage === 'posts') {
-        App.refresh();
+        await App.refresh();
     }
 });
 
@@ -383,11 +383,11 @@ function editPost(id) {
     openPostModal(id);
 }
 
-function deletePost(id) {
+async function deletePost(id) {
     if(confirm('Are you sure you want to delete this post?')) {
-        store.deletePost(id);
+        await store.deletePost(id);
         if (App.currentPage === 'posts') {
-            App.refresh();
+            await App.refresh();
         }
     }
 }
