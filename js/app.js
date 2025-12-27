@@ -1,48 +1,71 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // Navigation Logic
-    const navLinks = document.querySelectorAll('.nav-link');
-    const contentArea = document.getElementById('content-area');
-    const pageTitle = document.getElementById('page-title');
 
-    navLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const target = link.dataset.target;
+const App = {
+    currentPage: 'dashboard',
+    contentArea: null,
+    pageTitle: null,
+    navLinks: null,
 
-            // Update Active State
-            navLinks.forEach(l => l.classList.remove('active'));
-            link.classList.add('active');
+    init() {
+        this.contentArea = document.getElementById('content-area');
+        this.pageTitle = document.getElementById('page-title');
+        this.navLinks = document.querySelectorAll('.nav-link');
 
-            // Load Content
-            loadContent(target);
+        this.setupNavigation();
+        this.loadContent('dashboard');
+    },
+
+    setupNavigation() {
+        this.navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = link.dataset.target;
+
+                // Update Active State
+                this.navLinks.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+
+                // Load Content
+                this.loadContent(target);
+            });
         });
-    });
+    },
 
-    // Initial Load
-    loadContent('dashboard');
+    loadContent(target) {
+        this.currentPage = target;
+        // Update Active State in case loadContent is called directly
+        this.navLinks.forEach(l => {
+            if (l.dataset.target === target) {
+                l.classList.add('active');
+            } else {
+                l.classList.remove('active');
+            }
+        });
 
-    function loadContent(target) {
         // Clear Content
-        contentArea.innerHTML = '';
+        this.contentArea.innerHTML = '';
 
         switch(target) {
             case 'dashboard':
-                pageTitle.textContent = 'Dashboard';
-                renderDashboard();
+                this.pageTitle.textContent = 'Dashboard';
+                this.renderDashboard();
                 break;
             case 'platforms':
-                pageTitle.textContent = 'Platforms Management';
-                renderPlatforms();
+                this.pageTitle.textContent = 'Platforms Management';
+                this.renderPlatforms();
                 break;
             case 'posts':
-                pageTitle.textContent = 'Posts Management';
-                renderPosts();
+                this.pageTitle.textContent = 'Posts Management';
+                this.renderPosts();
                 break;
         }
-    }
+    },
+
+    refresh() {
+        this.loadContent(this.currentPage);
+    },
 
     // --- Dashboard Logic ---
-    function renderDashboard() {
+    renderDashboard() {
         const platforms = store.getPlatforms();
         const posts = store.getPosts();
 
@@ -128,11 +151,11 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `;
 
-        contentArea.innerHTML = html;
-    }
+        this.contentArea.innerHTML = html;
+    },
 
     // --- Platforms Logic ---
-    function renderPlatforms() {
+    renderPlatforms() {
         const platforms = store.getPlatforms();
 
         const html = `
@@ -156,11 +179,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 `).join('')}
             </div>
         `;
-        contentArea.innerHTML = html;
-    }
+        this.contentArea.innerHTML = html;
+    },
 
     // --- Posts Logic ---
-    function renderPosts() {
+    renderPosts() {
         const posts = store.getPosts();
         const platforms = store.getPlatforms();
 
@@ -216,8 +239,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </div>
         `;
-        contentArea.innerHTML = html;
+        this.contentArea.innerHTML = html;
     }
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    App.init();
 });
 
 // Global functions for inline event handlers (Platform)
@@ -270,13 +297,8 @@ document.getElementById('platform-form').addEventListener('submit', (e) => {
     closePlatformModal();
 
     // Refresh current view if it is platforms
-    // A bit hacky way to refresh, but works for simple app
-    const activeLink = document.querySelector('.nav-link.active');
-    if (activeLink && activeLink.dataset.target === 'platforms') {
-        activeLink.click();
-    } else {
-        // Just reload
-         window.location.reload();
+    if (App.currentPage === 'platforms') {
+        App.refresh();
     }
 });
 
@@ -287,9 +309,8 @@ function editPlatform(id) {
 function deletePlatform(id) {
     if(confirm('Are you sure you want to delete this platform?')) {
         store.deletePlatform(id);
-        const activeLink = document.querySelector('.nav-link.active');
-        if (activeLink && activeLink.dataset.target === 'platforms') {
-            activeLink.click();
+        if (App.currentPage === 'platforms') {
+            App.refresh();
         }
     }
 }
@@ -353,11 +374,8 @@ document.getElementById('post-form').addEventListener('submit', (e) => {
     store.savePost(post);
     closePostModal();
 
-    const activeLink = document.querySelector('.nav-link.active');
-    if (activeLink && activeLink.dataset.target === 'posts') {
-        activeLink.click();
-    } else {
-         window.location.reload();
+    if (App.currentPage === 'posts') {
+        App.refresh();
     }
 });
 
@@ -368,9 +386,8 @@ function editPost(id) {
 function deletePost(id) {
     if(confirm('Are you sure you want to delete this post?')) {
         store.deletePost(id);
-        const activeLink = document.querySelector('.nav-link.active');
-        if (activeLink && activeLink.dataset.target === 'posts') {
-            activeLink.click();
+        if (App.currentPage === 'posts') {
+            App.refresh();
         }
     }
 }
